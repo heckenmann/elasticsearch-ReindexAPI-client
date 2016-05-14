@@ -1,3 +1,4 @@
+[![Build Status](https://travis-ci.org/heckenmann/elasticsearch-ReindexAPI-client.svg?branch=master)](https://travis-ci.org/heckenmann/elasticsearch-ReindexAPI-client)
 # elasticsearch-ReindexAPI-client
 Simple GUI for elasticsearch Reindex API
 
