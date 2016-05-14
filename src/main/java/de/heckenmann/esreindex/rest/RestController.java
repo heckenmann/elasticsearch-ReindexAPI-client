@@ -67,6 +67,12 @@ public class RestController {
     }
 
     public boolean startReindexing(String source, String dest, Map<String, String> mappings) {
+        Map<String, Object> requestBody = generateQuery(source, dest, mappings);
+        readPath("_reindex", HttpMethod.POST, requestBody);
+        return true;
+    }
+
+    private Map<String, Object> generateQuery(String source, String dest, Map<String, String> mappings) {
         Map<String, Object> requestBody = new HashMap<String, Object>() {
             {
                 put("source", new HashMap<String, Object>() {
@@ -79,15 +85,27 @@ public class RestController {
                         put("index", dest);
                     }
                 });
-                put("script", new HashMap<String, Object>() {
-                    {
-                        put("inline", generateInlineScript(mappings));
-                    }
-                });
+                String script = generateInlineScript(mappings);
+                if (script != null && !script.isEmpty()) {
+                    put("script", new HashMap<String, Object>() {
+                        {
+                            put("inline", script);
+                        }
+                    });
+                }
             }
         };
-        readPath("_reindex", HttpMethod.POST, requestBody);
-        return true;
+        return requestBody;
+    }
+
+    public String getQueryAsString(String source, String dest, Map<String, String> mappings) {
+        String result = null;
+        try {
+            result = new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(generateQuery(source, dest, mappings));
+        } catch (JsonProcessingException e) {
+            LOG.severe(e.getMessage());
+        }
+        return result;
     }
 
     private String generateInlineScript(Map<String, String> mappings) {
